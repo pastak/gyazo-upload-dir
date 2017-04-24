@@ -22,6 +22,7 @@
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "chokidar": "^1.6.0",
+    "exif": "^0.6.0",
     "gyazo-api": "^0.3.1",
     "minimist": "^1.2.0"
   },

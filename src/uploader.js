@@ -1,5 +1,6 @@
 import {watch} from 'chokidar'
 import Gyazo from 'gyazo-api'
+import {ExifImage} from 'exif'
 import {EventEmitter} from 'events'
 
 export default class Uploader extends EventEmitter {
@@ -26,9 +27,20 @@ export default class Uploader extends EventEmitter {
 
   onNewFile (source) {
     this.emit('upload', source)
-    this.gyazo
-      .upload(source, {title: 'gyazo-upload-dir', desc: 'up'})
-      .then(result => this.emit('success', {source, result}))
-      .catch(err => this.emit('error', err))
+    new ExifImage({image: source}, (error, exifData) => {
+        if (error) {
+          console.log('Error: '+error.message)
+        } else {
+            const originalDate = Date.parse(
+              exifData.exif.DateTimeOriginal
+                .replace(/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/,'$1-$2-$3 $4:$5:$6')
+            )
+            / 1000
+            this.gyazo
+              .upload(source, {created_at: originalDate})
+              .then(result => this.emit('success', {source, result}))
+              .catch(err => this.emit('error', err))
+        }
+    })
   }
 }
